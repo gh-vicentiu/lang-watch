@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Q&A Viewer</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <h1>Q&A Viewer</h1>
+    {% for index, qa_pair in qa_pairs %}
+        <div class="qa-section">
+            <form method="post" class="qa-form">
+                <div class="question">
+                    <h2>Question:</h2>
+                    <textarea name="question">{{ qa_pair['question'] }}</textarea>
+                </div>
+                <div class="answer">
+                    <h2>Answer:</h2>
+                    <textarea name="answer">{{ qa_pair['answer'] }}</textarea>
+                </div>
+                <input type="hidden" name="index" value="{{ index }}">
+                <button type="submit">Save</button>
+            </form>
+        </div>
+    {% endfor %}
+</body>
+</html>

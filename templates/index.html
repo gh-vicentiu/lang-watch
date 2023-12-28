@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Text Analysis Dashboard</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <h1>Text Analysis Dashboard</h1>
+    <p>Total Words: {{ total_words }}</p>
+    <p>Total Q&A Pairs: {{ total_qa_pairs }}</p>
+    <nav>
+        <ul>
+            <li><a href="/words">Word Context Viewer</a></li>
+            <li><a href="/upload">Upload Data</a></li>
+            <li><a href="/qa">View & Edit Q&A</a></li>
+            <li><a href="/cube">Cube</a></li>
+        </ul>
+    </nav>
+</body>
+</html>

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Word Cube</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+        #sidebar {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 250px; /* Adjust width as needed */
+            height: 100vh;
+            background-color: rgba(0, 0, 0, 0.75);
+            color: white;
+            padding: 20px;
+            box-sizing: border-box;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+        }
+        #cube-container {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+        }
+        .list-container {
+            margin-top: 10px;
+            border: 1px solid white;
+            height: 200px; /* Adjust height as needed */
+            overflow-y: scroll;
+        }
+    </style>
+</head>
+<body>
+    <div id="sidebar">
+        <input id="word-search" type="text" placeholder="Type a word...">
+        <label><input id="common-connections" type="checkbox"> Common connections only</label>
+        <label><input id="common-connections-color" type="checkbox"> Hide non-common connections</label>
+        
+        <div class="list-container">
+            Active Connections: <span id="active-connections-list">None</span>
+        </div>
+        <div class="list-container">
+            Common Active Connections: <span id="common-connections-words">None</span>
+        </div>
+        <div id="info-panel">Hovered Cube: <span id="cube-name">None</span></div>
+    </div>
+    <div id="cube-container"></div>
+    <script type="module" src="{{ url_for('static', filename='main.js') }}"></script>
+</body>
+</html>

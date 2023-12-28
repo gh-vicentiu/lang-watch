@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Word Context Viewer</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}">
+    <style>
+        /* Additional styles for collapsible */
+        .collapsible {
+            background-color: #f9f9f9;
+            color: #444;
+            cursor: pointer;
+            padding: 18px;
+            width: 100%;
+            border: none;
+            text-align: left;
+            outline: none;
+            font-size: 15px;
+        }
+
+        .active, .collapsible:hover {
+            background-color: #ccc;
+        }
+
+        .content {
+            padding: 0 18px;
+            display: none;
+            overflow: hidden;
+            background-color: #f1f1f1;
+            column-count: 4; /* Adjust number of columns as needed */
+        }
+
+        .word-entry {
+            break-inside: avoid-column;
+            padding: 5px;
+        }
+
+        /* Layout adjustments for form elements */
+        .word-form {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .word-form .word-input, .word-form .submit-button {
+            margin: 0 10px;
+        }
+
+        .navigation-button {
+            /* Additional styling as needed */
+        }
+
+        .submit-button {
+            /* Additional styling as needed */
+        }
+    </style>
+</head>
+<body>
+    <button type="button" class="collapsible">Words</button>
+    <div class="content">
+        {% for key, count in word_counts_sorted %}
+            <div class="word-entry">
+                <a href="{{ url_for('words', word=key) }}" class="word-link">{{ key }} ({{ count }})</a>
+            </div>
+        {% endfor %}
+    </div>
+        <div id="content">
+            <form method="post" class="word-form">
+                Enter word: <input type="text" name="word" value="{{ word }}" class="word-input" />
+                <input type="submit" value="Get Context" class="submit-button" />
+                <button type="submit" name="navigate" value="{{ prev_word }}" class="navigation-button">Previous Word ({{ prev_word }})</button>
+                <button type="submit" name="navigate" value="{{ next_word }}" class="navigation-button">Next Word ({{ next_word }})</button>
+
+            </form>
+            <h2>Context for '{{ word }}'</h2>
+            {% if context %}
+                <table class="context-table">
+                    <tr>
+                        {%- for pos in positions %}
+                        <th>{{ pos }}</th>
+                        {% endfor %}
+                    </tr>
+                    {% for i in range(32) %} <!-- Iterate through 32 rows -->
+                    <tr>
+                        {%- for pos in positions %}
+                        <td class="{{ 'central-cell' if pos == 0 }} word-cell">
+                            {% if pos == 0 %}
+                                {{ word }}
+                            {% else %}
+                                {% set words_at_pos = context.get(pos, []) %}
+                                {% if words_at_pos|length > i %} <!-- Check if there's a word for this row -->
+                                    {% set w, count = words_at_pos[i] %}
+                                    <a href="{{ url_for('words', word=w) }}" class="word-link">{{ w }} ({{ count }})</a>
+                                {% endif %}
+                            {% endif %}
+                        </td>
+                        {% endfor %}
+                    </tr>
+                    {% endfor %}
+                </table>
+            {% else %}
+                <p>No data available for this word.</p>
+            {% endif %}
+        </div>
+        <script>
+            // Script for collapsible behavior
+            var coll = document.getElementsByClassName("collapsible");
+            for (var i = 0; i < coll.length; i++) {
+                coll[i].addEventListener("click", function() {
+                    this.classList.toggle("active");
+                    var content = this.nextElementSibling;
+                    if (content.style.display === "block") {
+                        content.style.display = "none";
+                    } else {
+                        content.style.display = "block";
+                    }
+                });
+            }
+        </script>
+</body>
+</html>
