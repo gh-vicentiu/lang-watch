@@ -2,19 +2,57 @@
 <html>
 <head>
     <title>Text Analysis Dashboard</title>
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/styles.css') }}">
 </head>
 <body>
     <h1>Text Analysis Dashboard</h1>
-    <p>Total Words: {{ total_words }}</p>
-    <p>Total Q&A Pairs: {{ total_qa_pairs }}</p>
     <nav>
         <ul>
-            <li><a href="/words">Word Context Viewer</a></li>
-            <li><a href="/upload">Upload Data</a></li>
-            <li><a href="/qa">View & Edit Q&A</a></li>
-            <li><a href="/cube">Cube</a></li>
+            <li><a href="/add_project">Add New Project</a></li>
         </ul>
     </nav>
+
+    <!-- Display flash messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    {% for category, message in messages %}
+    <div class="flash-{{ category }}">{{ message }}</div>
+    {% endfor %}
+    {% endif %}
+    {% endwith %}
+
+    <h2>Projects</h2>
+    <div class="projects">
+        {% for id, project in projects.items() %}
+        <div class="project">
+            <h3>{{ project.name }}</h3>
+            <p>Description: {{ project.description }}</p>
+            <p>Total Words: {{ project.total_words | default('Not Calculated') }}</p>
+            <p>Total Q&A Pairs: {{ project.total_qa_pairs | default('Not Calculated') }}</p>
+            <p>Project File: 
+              {% if project.file_exists %}
+                Present
+                <!-- Show result status -->
+                <p>Results Status: 
+                  {% if project.results_exists | default(false) %}
+                    Ready <a href="{{ url_for('download_results', project_id=id) }}">Download</a>
+                  {% else %}
+                    Not Processed
+                  {% endif %}
+                </p>
+                <!-- Button to process the file -->
+                <button onclick="location.href='{{ url_for('process_project_route', project_id=id) }}'">Process File</button>
+              {% else %}
+                Not Uploaded <a href="{{ url_for('upload_file', project_id=id) }}">Upload Now</a>
+              {% endif %}
+            </p>
+            <!-- Add links to view the specific project's word context, Q&A, and cube -->
+            <a href="{{ url_for('words', project_id=id) }}">Word Context Viewer</a>
+            <a href="{{ url_for('edit_qa', project_id=id) }}">View & Edit Q&A</a>
+            <a href="{{ url_for('cube', project_id=id) }}">Cube</a>
+            <a href="{{ url_for('delete_project', project_id=id) }}">Delete</a>
+        </div>
+        {% endfor %}
+    </div>
 </body>
 </html>

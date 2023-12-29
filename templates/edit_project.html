@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Edit Project</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <h1>Edit Project</h1>
+    <form method="POST" action="/edit_project/{{ project_id }}">
+        <label for="name">Project Name:</label>
+        <input type="text" id="name" name="name" value="{{ project.name }}" required><br><br>
+
+        <label for="description">Description:</label>
+        <textarea id="description" name="description" required>{{ project.description }}</textarea><br><br>
+
+        <label for="file">File Name:</label>
+        <input type="text" id="file" name="file" value="{{ project.file }}" required><br><br>
+
+        <input type="submit" value="Save Changes">
+    </form>
+    <a href="/">Back to Dashboard</a>
+</body>
+</html>

@@ -2,7 +2,7 @@
 <html>
 <head>
     <title>Word Context Viewer</title>
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/styles.css') }}">
     <style>
         /* Additional styles for collapsible */
         .collapsible {
@@ -55,66 +55,71 @@
     </style>
 </head>
 <body>
+    <h1>Word Context Viewer for Project: {{ project.name }}</h1>
+    <a href="/">Back to Dashboard</a>
+
     <button type="button" class="collapsible">Words</button>
     <div class="content">
         {% for key, count in word_counts_sorted %}
             <div class="word-entry">
-                <a href="{{ url_for('words', word=key) }}" class="word-link">{{ key }} ({{ count }})</a>
+                <a href="{{ url_for('words', project_id=project_id, word=key) }}" class="word-link">{{ key }} ({{ count }})</a>
             </div>
         {% endfor %}
     </div>
-        <div id="content">
-            <form method="post" class="word-form">
-                Enter word: <input type="text" name="word" value="{{ word }}" class="word-input" />
-                <input type="submit" value="Get Context" class="submit-button" />
-                <button type="submit" name="navigate" value="{{ prev_word }}" class="navigation-button">Previous Word ({{ prev_word }})</button>
-                <button type="submit" name="navigate" value="{{ next_word }}" class="navigation-button">Next Word ({{ next_word }})</button>
 
-            </form>
-            <h2>Context for '{{ word }}'</h2>
-            {% if context %}
-                <table class="context-table">
-                    <tr>
-                        {%- for pos in positions %}
-                        <th>{{ pos }}</th>
-                        {% endfor %}
-                    </tr>
-                    {% for i in range(32) %} <!-- Iterate through 32 rows -->
+    <div id="content">
+        <form method="post" class="word-form" action="{{ url_for('words', project_id=project_id) }}">
+            Enter word: <input type="text" name="word" value="{{ word }}" class="word-input" />
+            <input type="submit" value="Get Context" class="submit-button" />
+            <button type="submit" name="navigate" value="{{ prev_word }}" class="navigation-button">Previous Word ({{ prev_word }})</button>
+            <button type="submit" name="navigate" value="{{ next_word }}" class="navigation-button">Next Word ({{ next_word }})</button>
+        </form>
+        <h2>Context for '{{ word }}'</h2>
+        {% if context %}
+            <table class="context-table">
+                <tr>
+                    {%- for pos in positions %}
+                    <th>{{ pos }}</th>
+                    {% endfor %}
+                </tr>
+                {% for i in range(32) %} <!-- Iterate through 32 rows -->
                     <tr>
                         {%- for pos in positions %}
                         <td class="{{ 'central-cell' if pos == 0 }} word-cell">
                             {% if pos == 0 %}
                                 {{ word }}
                             {% else %}
-                                {% set words_at_pos = context.get(pos, []) %}
+                                {# Use the position directly as a string key #}
+                                {% set words_at_pos = context.get(pos|string, []) %}
                                 {% if words_at_pos|length > i %} <!-- Check if there's a word for this row -->
-                                    {% set w, count = words_at_pos[i] %}
-                                    <a href="{{ url_for('words', word=w) }}" class="word-link">{{ w }} ({{ count }})</a>
+                                    {% set word_count_pair = words_at_pos[i] %}
+                                    <a href="{{ url_for('words', project_id=project_id, word=word_count_pair[0]) }}" class="word-link">{{ word_count_pair[0] }} ({{ word_count_pair[1] }})</a>
                                 {% endif %}
                             {% endif %}
                         </td>
                         {% endfor %}
                     </tr>
                     {% endfor %}
-                </table>
-            {% else %}
-                <p>No data available for this word.</p>
-            {% endif %}
-        </div>
-        <script>
-            // Script for collapsible behavior
-            var coll = document.getElementsByClassName("collapsible");
-            for (var i = 0; i < coll.length; i++) {
-                coll[i].addEventListener("click", function() {
-                    this.classList.toggle("active");
-                    var content = this.nextElementSibling;
-                    if (content.style.display === "block") {
-                        content.style.display = "none";
-                    } else {
-                        content.style.display = "block";
-                    }
-                });
-            }
-        </script>
+            </table>
+        {% else %}
+            <p>No data available for this word.</p>
+        {% endif %}
+    </div>
+
+    <script>
+        // Script for collapsible behavior
+        var coll = document.getElementsByClassName("collapsible");
+        for (var i = 0; i < coll.length; i++) {
+            coll[i].addEventListener("click", function() {
+                this.classList.toggle("active");
+                var content = this.nextElementSibling;
+                if (content.style.display === "block") {
+                    content.style.display = "none";
+                } else {
+                    content.style.display = "block";
+                }
+            });
+        }
+    </script>
 </body>
 </html>
