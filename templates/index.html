@@ -32,16 +32,28 @@
             <p>Project File: 
               {% if project.file_exists %}
                 Present
-                <!-- Show result status -->
-                <p>Results Status: 
-                  {% if project.results_exists | default(false) %}
-                    Ready <a href="{{ url_for('download_results', project_id=id) }}">Download</a>
-                  {% else %}
-                    Not Processed
-                  {% endif %}
+                <!-- Show result status for wordified file -->
+                <p>Results Status:
+                    {% if project.results_exists %}
+                      File Wordified! <a href="{{ url_for('download_results', project_id=id) }}">Download</a>
+                    {% else %}
+                      Not Processed
+                    {% endif %}
                 </p>
-                <!-- Button to process the file -->
-                <button onclick="location.href='{{ url_for('process_project_route', project_id=id) }}'">Process File</button>
+                <!-- Button to process the wordified file -->
+                <button onclick="location.href='{{ url_for('process_project_route', project_id=id) }}'">Wordify File</button>
+
+                <!-- Show cube data status -->
+                <p>Cube Data Status:
+                    {% if project.cube_data_exists %}
+                      Cube Ready! <a href="{{ url_for('download_cube_data', project_id=id) }}">Download</a>
+                    {% else %}
+                      Not Processed
+                    {% endif %}
+                </p>
+                <!-- Button to process the cube data -->
+                <button onclick="location.href='{{ url_for('process_cube_route', project_id=id) }}'">Cubify Data</button>
+
               {% else %}
                 Not Uploaded <a href="{{ url_for('upload_file', project_id=id) }}">Upload Now</a>
               {% endif %}
@@ -54,5 +66,9 @@
         </div>
         {% endfor %}
     </div>
+    <script>
+        // Add any JavaScript needed for additional functionality
+    </script>
 </body>
+
 </html>

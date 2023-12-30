@@ -1,15 +1,12 @@
 import * as THREE from 'https://cdn.skypack.dev/three@0.128.0';
 import { scene } from './sceneSetup.js';
 
-// Cube management
 let cubeMeshes = {};
-let intersected = null; // Renamed to lowercase to avoid naming conflicts
+let intersected = null;
 
-// Texture loader
 const loader = new THREE.TextureLoader();
-const texture = loader.load('/static/tex.png'); // Update texture path accordingly
+const texture = loader.load('/static/tex.png');
 
-// Reset all cubes to default state
 export function resetCubes() {
     Object.values(cubeMeshes).forEach(mesh => {
         mesh.material.color.set(0x333333);
@@ -17,11 +14,17 @@ export function resetCubes() {
     });
 }
 
-// Load and process cube data
-export async function loadCubeData() {
-    const response = await fetch('/static/cube_data.json');
-    const cubeData = await response.json();
+export async function loadCubeData(cubeDataPath) {
+    let cubeData;
+    try {
+        const response = await fetch(cubeDataPath);
+        cubeData = await response.json();
+    } catch (error) {
+        console.error('Error loading cube data:', error);
+        return;  // Early return if fetching or parsing failed
+    }
 
+    // Only proceed if cubeData is successfully loaded
     cubeData.forEach(wordObj => {
         const geometry = new THREE.BoxGeometry(0.02, 0.02, 0.02);
         const material = new THREE.MeshLambertMaterial({ map: texture });
@@ -35,7 +38,6 @@ export async function loadCubeData() {
     });
 }
 
-// Mouse move event handler
 export function onMouseMove(event, mouse) {
     event.preventDefault();
     mouse.x = (event.clientX / window.innerWidth) * 2 - 1;

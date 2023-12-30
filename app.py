@@ -3,7 +3,9 @@ import json
 import uuid
 import os
 import shutil
-from f0 import process_project_data 
+from f0 import process_project_data
+from f1 import process_cube_data 
+from flask import send_from_directory  # Add this import
 
 app = Flask(__name__)
 app.secret_key = '<tZ\x98\x8f\xf3\xc2mt\xe1\x97\xff\xe7Q4\xd9\x810\xfb\xe3(`\xd5<'
@@ -65,13 +67,45 @@ def calculate_project_counters(project_id):
 def index():
     global projects_data
     for project_id, details in projects_data.items():
-        # Update to use the new function signature
+        # Assuming calculate_project_counters is already defined and works correctly
         total_words, total_qa_pairs = calculate_project_counters(project_id)
+
+        # Determine the file path for the project's results data
+        results_file = details.get('string-words', '')
+        results_file_path = os.path.join('projects', project_id, results_file)
+
+        # Determine the file path for the project's cube data
+        cube_file_path = os.path.join('projects', project_id, 'cube_data.json')
+
+        # Update projects_data with counters, results file existence, and cube data existence
         projects_data[project_id].update({
             'total_words': total_words,
-            'total_qa_pairs': total_qa_pairs
+            'total_qa_pairs': total_qa_pairs,
+            'results_exists': os.path.isfile(results_file_path),  # Check if results file exists
+            'cube_data_exists': os.path.isfile(cube_file_path)  # Check if cube data file exists
         })
+
     return render_template('index.html', projects=projects_data)
+
+@app.route('/download_results/<project_id>')
+def download_results(project_id):
+    project = projects_data.get(project_id)
+    if not project:
+        flash("Project not found!", "error")
+        return redirect(url_for('index'))
+
+    results_file = project.get('string-words', '')
+    if not results_file:
+        flash("Results file name not specified in project!", "error")
+        return redirect(url_for('index'))
+
+    file_path = os.path.join('projects', project_id, results_file)
+    if not os.path.isfile(file_path):
+        flash(f"Results file not found at {file_path}!", "error")
+        return redirect(url_for('index'))
+
+    return send_from_directory('projects/' + project_id, results_file, as_attachment=True)
+
 
 @app.route('/add_project', methods=['GET', 'POST'])
 def add_project():
@@ -190,15 +224,64 @@ def process_project_route(project_id):
     config_path = 'config.json'  # Path to your config.json
 
     if project_id in projects_data:
-        result_path = process_project_data(project_id, projects_data, config_path)
-        if result_path:
-            flash(f'Project processed successfully. Results saved to {result_path}', 'success')
+        # Call the function to process the project data (results.json into cube_data.json)
+        if process_cube_data(project_id, projects_data):  # Assuming process_cube_data is from f1.py
+            flash(f'Project {project_id} processed successfully.', 'success')
         else:
-            flash('Failed to process project', 'error')
+            flash(f'Failed to process project {project_id}', 'error')
+        
+        # Update config.json with the latest projects_data
+        with open(config_path, 'w') as config_file:
+            json.dump({'projects': projects_data}, config_file, indent=4)
     else:
         flash('Project not found', 'error')
     
     return redirect(url_for('index'))
+
+@app.route('/process_cube/<project_id>')
+def process_cube_route(project_id):
+    global projects_data
+    config_path = 'config.json'  # Path to your config.json
+
+    if project_id in projects_data:
+        if process_cube_data(project_id, projects_data):  # Assuming process_cube_data is from f1.py
+            flash(f'Cube data processed successfully for project {project_id}', 'success')
+
+            # Update the project's entry in projects_data with the cube data file name
+            projects_data[project_id]['cube-data'] = 'cube_data.json'  # Update this key accordingly
+
+            # Write the updated projects_data back to config.json
+            with open(config_path, 'w') as config_file:
+                json.dump({'projects': projects_data}, config_file, indent=4)
+
+        else:
+            flash(f'Failed to process cube data for project {project_id}', 'error')
+    else:
+        flash('Project not found', 'error')
+    
+    return redirect(url_for('index'))
+
+
+@app.route('/download_cube_data/<project_id>')
+def download_cube_data(project_id):
+    project = projects_data.get(project_id)
+    if not project:
+        flash("Project not found!", "error")
+        return redirect(url_for('index'))
+
+    cube_file = project.get('cube-data', '')  # Ensure this key matches what you've set in process_cube_route
+    if not cube_file:
+        flash("Cube data file name not specified in project!", "error")
+        return redirect(url_for('index'))
+
+    file_path = os.path.join('projects', project_id, cube_file)
+    if not os.path.isfile(file_path):
+        flash(f"Cube data file not found at {file_path}!", "error")
+        return redirect(url_for('index'))
+
+    return send_from_directory('projects/' + project_id, cube_file, as_attachment=True)
+
+
 
 @app.route('/words/<project_id>', methods=['GET', 'POST'])
 def words(project_id):
@@ -317,10 +400,15 @@ def cube(project_id):
     # Prepare data for the cube, starting with '<space>' in the center
     cube_data = ["<space>"] + [word for word, count in word_counts_sorted]
 
-    # Pass the project and cube_data to the template
-    return render_template('cube.html', project_id=project_id, project=project, cube_data=cube_data)
+    # Pass the dynamic path to the cube_data.json
+    cube_data_path = f"/projects/{project_id}/cube_data.json"  # Adjust if necessary
 
+    return render_template('cube.html', project_id=project_id, project=project, cube_data=cube_data, cube_data_path=cube_data_path)
 
+@app.route('/projects/<project_id>/cube_data.json')
+def serve_cube_data(project_id):
+    directory = os.path.join('projects', project_id)
+    return send_from_directory(directory, 'cube_data.json')
 
 if __name__ == '__main__':
     app.run(debug=True)

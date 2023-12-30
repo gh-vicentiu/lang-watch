@@ -6,8 +6,8 @@ import { cubeMeshes, resetCubes, loadCubeData, onMouseMove, INTERSECTED } from '
 // Attach renderer to the page
 document.getElementById('cube-container').appendChild(renderer.domElement);
 
-// Load and process cube data
-loadCubeData().then(() => {
+// Load and process cube data using the dynamic path
+loadCubeData(cubeDataPath).then(() => {  // Pass the cubeDataPath to the loadCubeData function
     camera.position.z = 2;
     animate();
 }).catch(error => {

@@ -7,7 +7,9 @@
             "file_exists": true,
             "total_words": 20232,
             "total_qa_pairs": 997,
-            "string-words": "results.json"
+            "string-words": "results.json",
+            "results_exists": true,
+            "cube_data_exists": false
         },
         "9db47491-c69d-4090-bbed-17ebfd91ff55": {
             "name": "1",
@@ -16,7 +18,19 @@
             "total_words": 20232,
             "total_qa_pairs": 997,
             "file_exists": true,
-            "string-words": "results.json"
+            "string-words": "results.json",
+            "results_exists": true,
+            "cube_data_exists": true,
+            "cube-data": "cube_data.json"
+        },
+        "62b267b5-873b-44ae-a448-27136d5b1001": {
+            "name": "2",
+            "description": "56",
+            "file": "",
+            "total_words": 0,
+            "total_qa_pairs": 0,
+            "results_exists": false,
+            "cube_data_exists": false
         }
     }
 }

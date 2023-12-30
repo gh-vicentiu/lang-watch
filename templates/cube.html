@@ -50,6 +50,10 @@
         <div id="info-panel">Hovered Cube: <span id="cube-name">None</span></div>
     </div>
     <div id="cube-container"></div>
+    <script>
+        // Define a global variable for the cube data path
+        var cubeDataPath = "{{ cube_data_path }}";
+    </script>
     <script type="module" src="{{ url_for('static', filename='main.js') }}"></script>
 </body>
 </html>
