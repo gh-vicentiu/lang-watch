@@ -26,9 +26,8 @@ def save_data(file_name, data):
 config_data = load_data('config.json')
 projects_data = config_data.get('projects', {})
 # Load data from the respective JSON files
-words_data = load_data('results.json')
-qa_data = load_data('joey.json')
-words_list = sorted(words_data.keys())
+
+
 
 def create_project_folder(project_id):
     os.makedirs(f'projects/{project_id}', exist_ok=True)
